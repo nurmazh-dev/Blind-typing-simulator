@@ -33,6 +33,8 @@
   --f-lindex: #dbe7fd;
   --f-rindex: #e9e0fb;
   --f-thumb: #ececea;
+  --hand: #3a3f4a;
+  --hand-opacity: 0.13;
 
   --radius: 14px;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 16px rgba(0, 0, 0, 0.04);
@@ -67,6 +69,8 @@
   --f-lindex: #213456;
   --f-rindex: #33294f;
   --f-thumb: #2a2d33;
+  --hand: #e8eaee;
+  --hand-opacity: 0.14;
 
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   color-scheme: dark;
@@ -400,6 +404,33 @@ a { color: var(--accent); text-decoration: none; }
   background: currentColor;
   opacity: 0.6;
 }
+
+/* ---------- Полупрозрачные руки (hands.js) ---------- */
+.keyboard { position: relative; }
+.hands {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none; /* руки не мешают клавишам */
+}
+/* Прозрачность задана для всей руки сразу, поэтому пальцы и ладонь
+   не темнеют там, где перекрываются */
+.hands .hand { opacity: var(--hand-opacity); }
+.hands .palm {
+  fill: var(--hand);
+  stroke: var(--hand);
+  stroke-width: calc(var(--finger-w) * 0.9);
+  stroke-linejoin: round;
+}
+.hands .finger {
+  stroke: var(--hand);
+  stroke-width: var(--finger-w);
+  stroke-linecap: round;
+}
+.hands .finger.active { stroke: var(--accent); opacity: 0.38; }
+.how-card .keyboard { margin-top: 1.25rem; }
 
 /* Зоны пальцев */
 .finger-lp, .finger-rp { background: var(--f-pinky); }

@@ -216,7 +216,12 @@ const App = {
       .map(k => `<li>${t(k, { left: bumps[0], right: bumps[1] })}</li>`).join('');
     // Новичку раскрываем подсказку сразу
     const progress = Storage.getLessons()[lang] || {};
-    document.getElementById('how-card').open = Object.keys(progress).length === 0;
+    const howCard = document.getElementById('how-card');
+    howCard.open = Object.keys(progress).length === 0;
+    // Клавиатура с руками на основном ряду. Пока подсказка свёрнута, размеров нет,
+    // поэтому руки дорисовываются при её раскрытии.
+    Keyboard.render(document.getElementById('how-keyboard'), lang, true, true);
+    howCard.ontoggle = () => { if (howCard.open) Hands.layout(); };
 
     const list = Lessons.list(lang);
     const done = list.filter(l => progress[l.id] && progress[l.id].passed).length;
@@ -309,6 +314,7 @@ const App = {
     segmented(document.getElementById('set-typing-lang'), langOptions(), s.typingLang, v => this.updateSetting('typingLang', v));
     segmented(document.getElementById('set-keyboard'), onOffOptions(), s.showKeyboard, v => this.updateSetting('showKeyboard', v));
     segmented(document.getElementById('set-fingers'), onOffOptions(), s.showFingers, v => this.updateSetting('showFingers', v));
+    segmented(document.getElementById('set-hands'), onOffOptions(), s.showHands, v => this.updateSetting('showHands', v));
   },
 
   showDataMessage(text) {

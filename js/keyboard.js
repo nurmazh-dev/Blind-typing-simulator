@@ -13,7 +13,7 @@ const Keyboard = {
   keyElements: {}, // code -> DOM-элемент клавиши
   highlighted: [], // какие клавиши сейчас подсвечены
 
-  render(container, layoutId, showFingers) {
+  render(container, layoutId, showFingers, showHands) {
     this.container = container;
     this.layoutId = layoutId;
     this.keyElements = {};
@@ -57,6 +57,11 @@ const Keyboard = {
 
       container.appendChild(rowEl);
     });
+
+    // Полупрозрачные руки поверх клавиш (см. hands.js)
+    this.showHands = showHands;
+    if (showHands) Hands.render(container);
+    else if (Hands.container === container) Hands.remove();
   },
 
   // Подсвечивает клавишу для символа ch. Для заглавных — ещё и Shift
@@ -64,10 +69,13 @@ const Keyboard = {
   highlight(ch) {
     this.highlighted.forEach(el => el.classList.remove('target'));
     this.highlighted = [];
-    if (ch === undefined || !this.container) return;
+    if (!this.container) return;
 
-    const info = getCharMap(this.layoutId)[ch];
-    if (!info) return;
+    const info = ch === undefined ? null : getCharMap(this.layoutId)[ch];
+    if (!info) {
+      if (this.showHands) Hands.update([]); // пальцы возвращаются на основной ряд
+      return;
+    }
 
     const codes = [info.code];
     if (info.shift) {
@@ -81,6 +89,7 @@ const Keyboard = {
         this.highlighted.push(el);
       }
     });
+    if (this.showHands) Hands.update(codes);
   },
 
   // Короткая вспышка на нажатой физической клавише

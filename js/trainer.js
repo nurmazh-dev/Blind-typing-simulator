@@ -60,12 +60,15 @@ const Trainer = {
     const settings = Storage.getSettings();
     this.el.title.textContent = config.title;
     this.el.sub.textContent = this.sub;
-    this.el.keyboard.hidden = !settings.showKeyboard;
-    if (settings.showKeyboard) Keyboard.render(this.el.keyboard, config.lang, settings.showFingers);
-    this.el.timeLabel.textContent = config.type === 'time' ? t('stats.left') : t('stats.time');
-
+    // Сначала показываем экран: руки рассчитываются по размерам видимых клавиш
     this.el.area.hidden = false;
     this.el.results.hidden = true;
+    this.el.keyboard.hidden = !settings.showKeyboard;
+    if (settings.showKeyboard) {
+      Keyboard.render(this.el.keyboard, config.lang, settings.showFingers, settings.showHands);
+    }
+    this.el.timeLabel.textContent = config.type === 'time' ? t('stats.left') : t('stats.time');
+
     this.active = true;
     this.renderText();
     this.updateStats();

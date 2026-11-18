@@ -40,6 +40,7 @@ const Storage = {
       typingLang: 'ru',      // язык тренировки
       showKeyboard: true,    // показывать виртуальную клавиатуру
       showFingers: true,     // раскрашивать клавиши по пальцам
+      showHands: true,       // показывать полупрозрачные руки на клавиатуре
       // последние выбранные параметры свободной практики
       practiceType: 'words',
       difficulty: 'easy',
