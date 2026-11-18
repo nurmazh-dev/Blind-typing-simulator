@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ProTyping — тренажёр слепой печати</title>
+  <meta name="description" content="Минималистичный тренажёр слепой печати: уроки, свободная практика и статистика.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%232f6bed'/><text x='16' y='22' font-size='16' font-family='monospace' font-weight='700' fill='white' text-anchor='middle'>P</text></svg>">
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Тема применяется сразу, до отрисовки страницы, чтобы не было «мигания» -->
+  <script>
+    try {
+      var saved = JSON.parse(localStorage.getItem('protyping.settings') || '{}');
+      var dark = saved.theme ? saved.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+    } catch (e) {}
+  </script>
+</head>
+<body>
+
+  <!-- ===================== Шапка ===================== -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a href="#/" class="logo">Pro<span>Typing</span></a>
+      <nav class="nav">
+        <a href="#/" data-route="home" data-i18n="nav.home"></a>
+        <a href="#/learn" data-route="learn" data-i18n="nav.learn"></a>
+        <a href="#/practice" data-route="practice" data-i18n="nav.practice"></a>
+        <a href="#/stats" data-route="stats" data-i18n="nav.stats"></a>
+        <a href="#/settings" data-route="settings" data-i18n="nav.settings"></a>
+      </nav>
+      <button id="theme-toggle" class="icon-btn" data-i18n-title="theme.toggle">
+        <!-- луна (показывается в светлой теме) -->
+        <svg class="icon-moon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        <!-- солнце (показывается в тёмной теме) -->
+        <svg class="icon-sun" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- ===================== Главная ===================== -->
+    <section id="view-home" class="view">
+      <div class="hero">
+        <h1 data-i18n="home.title"></h1>
+        <p class="lead" data-i18n="home.lead"></p>
+        <div class="hero-actions">
+          <a href="#/learn" class="btn btn-primary" data-i18n="home.startLearning"></a>
+          <a href="#/practice" class="btn" data-i18n="home.startPractice"></a>
+        </div>
+        <button id="quick-test" class="link-btn" data-i18n="home.quick"></button>
+      </div>
+
+      <div id="home-summary" class="card summary-card" hidden>
+        <h2 data-i18n="home.summary"></h2>
+        <div class="stat-grid" id="home-summary-grid"></div>
+      </div>
+
+      <div class="features">
+        <a href="#/learn" class="card feature">
+          <h3 data-i18n="home.learnTitle"></h3>
+          <p data-i18n="home.learnText"></p>
+        </a>
+        <a href="#/practice" class="card feature">
+          <h3 data-i18n="home.practiceTitle"></h3>
+          <p data-i18n="home.practiceText"></p>
+        </a>
+        <a href="#/stats" class="card feature">
+          <h3 data-i18n="home.statsTitle"></h3>
+          <p data-i18n="home.statsText"></p>
+        </a>
+      </div>
+    </section>
+
+    <!-- ===================== Обучение ===================== -->
+    <section id="view-learn" class="view" hidden>
+      <div class="page-head">
+        <h1 data-i18n="learn.title"></h1>
+        <div id="learn-lang" class="segmented"></div>
+      </div>
+      <p class="lead" id="learn-lead"></p>
+
+      <details class="card how-card" id="how-card">
+        <summary data-i18n="learn.howTitle"></summary>
+        <ol id="how-list"></ol>
+      </details>
+
+      <div class="learn-progress">
+        <span id="learn-progress-text"></span>
+        <div class="progress"><div class="progress-fill" id="learn-progress-fill"></div></div>
+      </div>
+
+      <div id="lesson-list" class="lesson-list"></div>
+    </section>
+
+    <!-- ===================== Свободная практика ===================== -->
+    <section id="view-practice" class="view" hidden>
+      <h1 data-i18n="practice.title"></h1>
+      <p class="lead" data-i18n="practice.lead"></p>
+
+      <div class="card options">
+        <div class="option">
+          <span class="option-label" data-i18n="practice.type"></span>
+          <div id="opt-type" class="segmented wrap"></div>
+        </div>
+        <div class="option" id="row-time">
+          <span class="option-label" data-i18n="practice.time"></span>
+          <div id="opt-time" class="segmented"></div>
+        </div>
+        <div class="option" id="row-count">
+          <span class="option-label" data-i18n="practice.words"></span>
+          <div id="opt-count" class="segmented"></div>
+        </div>
+        <div class="option" id="row-keys">
+          <span class="option-label" data-i18n="practice.keys"></span>
+          <div>
+            <div id="opt-keys" class="segmented wrap"></div>
+            <input id="opt-custom" class="input" type="text" maxlength="40" data-i18n-placeholder="practice.customPlaceholder">
+          </div>
+        </div>
+        <div class="option">
+          <span class="option-label" data-i18n="practice.difficulty"></span>
+          <div>
+            <div id="opt-diff" class="segmented"></div>
+            <p class="option-hint" id="diff-hint"></p>
+          </div>
+        </div>
+        <div class="option">
+          <span class="option-label" data-i18n="practice.language"></span>
+          <div id="opt-lang" class="segmented"></div>
+        </div>
+        <p class="form-error" id="practice-error" hidden></p>
+        <button id="practice-start" class="btn btn-primary btn-wide" data-i18n="practice.start"></button>
+      </div>
+    </section>
+
+    <!-- ===================== Экран тренировки ===================== -->
+    <section id="view-train" class="view train" hidden>
+      <div class="train-head">
+        <button id="train-back" class="link-btn">← <span data-i18n="train.back"></span></button>
+        <div class="train-titles">
+          <h2 id="train-title"></h2>
+          <p id="train-sub" class="muted"></p>
+        </div>
+        <button id="train-restart" class="link-btn" data-i18n="train.restart"></button>
+      </div>
+
+      <div id="train-area">
+        <!-- Показатели во время печати -->
+        <div class="live-stats">
+          <div><span class="live-value" id="stat-wpm">0</span><span class="live-label" data-i18n="stats.wpm"></span></div>
+          <div><span class="live-value" id="stat-acc">100%</span><span class="live-label" data-i18n="stats.accuracy"></span></div>
+          <div><span class="live-value" id="stat-err">0</span><span class="live-label" data-i18n="stats.errors"></span></div>
+          <div><span class="live-value" id="stat-time">0:00</span><span class="live-label" id="stat-time-label"></span></div>
+          <div><span class="live-value" id="stat-progress">0%</span><span class="live-label" data-i18n="stats.progress"></span></div>
+        </div>
+        <div class="progress"><div class="progress-fill" id="progress-fill"></div></div>
+
+        <!-- Текст упражнения -->
+        <div id="text-box" class="text-box">
+          <div id="text-inner" class="text-inner"></div>
+        </div>
+
+        <p id="train-hint" class="train-hint" data-i18n="train.hint"></p>
+        <p id="layout-warning" class="warning" data-i18n="train.layoutWarning" hidden></p>
+        <p id="caps-warning" class="warning" data-i18n="train.capsWarning" hidden></p>
+        <p class="mobile-note" data-i18n="train.mobile"></p>
+
+        <!-- Виртуальная клавиатура -->
+        <div id="keyboard" class="keyboard"></div>
+        <p class="shortcuts muted" data-i18n="train.shortcuts"></p>
+      </div>
+
+      <!-- Экран результатов -->
+      <div id="results" class="card results" hidden>
+        <h2 data-i18n="results.title"></h2>
+        <p id="res-message" class="res-message"></p>
+        <div class="stat-grid">
+          <div class="stat big"><span class="stat-value" id="res-wpm"></span><span class="stat-label" data-i18n="stats.wpm"></span></div>
+          <div class="stat big"><span class="stat-value" id="res-acc"></span><span class="stat-label" data-i18n="stats.accuracy"></span></div>
+          <div class="stat"><span class="stat-value" id="res-err"></span><span class="stat-label" data-i18n="stats.errors"></span></div>
+          <div class="stat"><span class="stat-value" id="res-time"></span><span class="stat-label" data-i18n="stats.time"></span></div>
+          <div class="stat"><span class="stat-value" id="res-chars"></span><span class="stat-label" data-i18n="stats.chars"></span></div>
+        </div>
+        <div class="results-actions">
+          <button id="res-next" class="btn btn-primary" data-i18n="results.next"></button>
+          <button id="res-repeat" class="btn" data-i18n="results.repeat"></button>
+          <button id="res-new" class="btn" data-i18n="results.new"></button>
+          <button id="res-back" class="btn btn-ghost" data-i18n="results.back"></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== Статистика ===================== -->
+    <section id="view-stats" class="view" hidden>
+      <div class="page-head">
+        <h1 data-i18n="statsPage.title"></h1>
+        <div id="stats-lang" class="segmented"></div>
+      </div>
+
+      <p id="stats-empty" class="card empty" data-i18n="statsPage.empty" hidden></p>
+
+      <div id="stats-content">
+        <div class="stat-grid stats-cards" id="stats-cards"></div>
+
+        <div class="card">
+          <h2 data-i18n="statsPage.chart"></h2>
+          <div class="chart-wrap"><canvas id="stats-chart"></canvas></div>
+          <p id="chart-error" class="muted" data-i18n="statsPage.noChart" hidden></p>
+        </div>
+
+        <div class="card">
+          <h2 data-i18n="statsPage.history"></h2>
+          <div class="table-wrap">
+            <table class="history">
+              <thead>
+                <tr>
+                  <th data-i18n="statsPage.date"></th>
+                  <th data-i18n="statsPage.exercise"></th>
+                  <th data-i18n="statsPage.lang"></th>
+                  <th data-i18n="stats.wpm"></th>
+                  <th data-i18n="stats.accuracy"></th>
+                  <th data-i18n="stats.errors"></th>
+                  <th data-i18n="stats.time"></th>
+                </tr>
+              </thead>
+              <tbody id="history-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== Настройки ===================== -->
+    <section id="view-settings" class="view" hidden>
+      <h1 data-i18n="settings.title"></h1>
+
+      <div class="card options">
+        <h2 data-i18n="settings.appearance"></h2>
+        <div class="option">
+          <span class="option-label" data-i18n="settings.theme"></span>
+          <div id="set-theme" class="segmented"></div>
+        </div>
+        <div class="option">
+          <span class="option-label" data-i18n="settings.uiLang"></span>
+          <div id="set-ui-lang" class="segmented"></div>
+        </div>
+      </div>
+
+      <div class="card options">
+        <h2 data-i18n="settings.training"></h2>
+        <div class="option">
+          <span class="option-label" data-i18n="settings.typingLang"></span>
+          <div id="set-typing-lang" class="segmented"></div>
+        </div>
+        <div class="option">
+          <span class="option-label" data-i18n="settings.showKeyboard"></span>
+          <div id="set-keyboard" class="segmented"></div>
+        </div>
+        <div class="option">
+          <span class="option-label" data-i18n="settings.showFingers"></span>
+          <div id="set-fingers" class="segmented"></div>
+        </div>
+      </div>
+
+      <div class="card options">
+        <h2 data-i18n="settings.data"></h2>
+        <p class="muted" data-i18n="settings.dataText"></p>
+        <div class="data-actions">
+          <button id="data-export" class="btn" data-i18n="settings.export"></button>
+          <button id="data-import" class="btn" data-i18n="settings.import"></button>
+          <button id="data-reset" class="btn btn-danger" data-i18n="settings.reset"></button>
+          <input id="data-file" type="file" accept=".json,application/json" hidden>
+        </div>
+        <p id="data-message" class="muted" hidden></p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">ProTyping · 2026</footer>
+
+  <!-- Библиотека графиков Chart.js 4.4.1 (лицензия MIT). Лежит в проекте,
+       поэтому графики работают даже без интернета. -->
+  <script src="js/vendor/chart.umd.js"></script>
+
+  <!-- Наши скрипты. Порядок важен: каждый следующий использует предыдущие. -->
+  <script src="js/i18n.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/layouts.js"></script>
+  <script src="js/texts.js"></script>
+  <script src="js/exercises.js"></script>
+  <script src="js/lessons.js"></script>
+  <script src="js/keyboard.js"></script>
+  <script src="js/trainer.js"></script>
+  <script src="js/stats.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
